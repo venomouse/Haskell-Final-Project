@@ -5,7 +5,10 @@ module Matrix
 ,   fold
 ,   rowfold
 ,   cols
+,   rows
 ,   set
+,   get
+,   subMat
 ) where
 
 import Control.Monad
@@ -35,6 +38,9 @@ create (d:ds)
 set :: Matrix a -> Int -> Int -> a -> Matrix a
 set (Mat d) n m r = Mat (replace d n (replace (d !! n) m r))
 
+get :: Matrix a -> Int -> Int -> a
+get (Mat d) n m = (d !! n) !! m
+
 replace :: [a] -> Int -> a -> [a]
 replace (d:ds) 0 new = (new:ds)
 replace (d:ds) n new = d : (replace ds (n-1) new)
@@ -42,5 +48,12 @@ replace (d:ds) n new = d : (replace ds (n-1) new)
 cols :: Matrix a -> Int
 cols (Mat (d:ds)) = length d
 
-main = print $ set (create [[True,True],[False,True]]) 0 1 False
+rows :: Matrix a -> Int
+rows (Mat m) = length m
+
+subMat :: Matrix a -> (Int, Int) -> (Int, Int) -> Matrix a
+subMat (Mat m) (x,y) (x',y') = create $ map (subList y y') (subList x x' m) where
+    subList m n d = (take (n-m + 1) . drop m) d
+
+main = print $ get (create (replicate 4 [1..4])) 1 0
 --rowfold (\p acc -> (if p then '*' else '.'):acc) ""  (create [[True,True],[False,True]])
