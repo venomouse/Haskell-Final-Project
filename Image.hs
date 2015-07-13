@@ -42,18 +42,42 @@ quantize i s = fmap q i where
 
 laplacian :: Image -> Image
 laplacian i = generate f (rows i) (cols i) where
-    f x y =  abs (avg - (get i x y)) where
+    f x y =  abs (avg - (get i (x,y))) where
         avg     = (fold (\acc x -> acc + x) 0 m) `div` (rows m * cols m) where
             m   = rectAbout i (x,y) 1
 
 threshold :: Int -> Image -> Image
 threshold n = fmap (\x -> if (x<n) then 0 else 255)
-    
-        
 
-main = putStr $ display (laplacian (threshold 100 image)) where
-    image = generate f 20 20
+normalize :: Matrix Float -> Matrix Float 
+normalize ker = fmap (/sumMat) ker where
+                sumMat = fold (+) 0 ker
+            
+
+convolve :: Matrix Float -> Image -> Image 
+convolve ker im =  generate f (rows im) (cols im) where
+    f x y = floor . abs $  fold (+) 0 (filterMult (ker) (fmap fromIntegral im) (x,y)) where  
+
+ 
+--convolution::Matrix a -> Image -> Image
+ 
+identityKernel  = create [[0,0,0],[0,1,0],[0,0,0]]
+edges4cor       = create [[1,0,-1],[0,0,0],[-1,0,1]]
+edges4sides     = create [[0,1,0],[1,-4,1],[0,1,0]]
+edges8          = create [[0.125, 0.125, 0.125],[0.125,-1,0.125],[0.125, 0.125, 0.125]]
+sharpenKernel   = create [[0,-1,0],[-1,5,-1],[0,-1,0]]
+blurKernel      = create [[0.11,0.11,0.11],[0.11,0.11,0.11],[0.11,0.11,0.11]]
+--gBlurKernel     = create [[0.0625, 0.125, 0.0625], [0.125, 0.25, 0.125], [0.0625, 0.125, 0.0625]]
+gBlurKernel     = fmap (/16) $ create [[1, 2, 1], [2, 4, 2], [1, 2, 1]]
+
+main = putStr $ display (convolve k i) where
+    i = generate f 20 20
     f x y = ((x + y) * 12) `mod` 255
+    k = edges4sides
+    
+
+    --image = generate f 20 20
+    --f x y = ((x + y) * 12) `mod` 255
     --f x y = floor((sin x' * cos y') * 255) `mod` 255  where
     --    x' = fromIntegral x
     --    y' = fromIntegral y 

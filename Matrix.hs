@@ -9,6 +9,7 @@ module Matrix
 ,   set
 ,   get
 ,   subMat
+,   filterMult
 ) where
 
 import Control.Monad
@@ -35,11 +36,11 @@ create (d:ds)
     | otherwise                 = error "Matrix rows are imbalanced!"
     where balanced n = all $ (n ==) . length
 
-set :: Matrix a -> Int -> Int -> a -> Matrix a
-set (Mat d) n m r = Mat (replace d n (replace (d !! n) m r))
+set :: Matrix a -> (Int, Int) -> a -> Matrix a
+set (Mat d) (n,m) r = Mat (replace d n (replace (d !! n) m r))
 
-get :: Matrix a -> Int -> Int -> a
-get (Mat d) n m = (d !! n) !! m
+get :: Matrix a -> (Int, Int) -> a
+get (Mat d) (n,m) = (d !! n) !! m
 
 replace :: [a] -> Int -> a -> [a]
 replace (d:ds) 0 new = (new:ds)
@@ -55,5 +56,26 @@ subMat :: Matrix a -> (Int, Int) -> (Int, Int) -> Matrix a
 subMat (Mat m) (x,y) (x',y') = create $ map (subList y y') (subList x x' m) where
     subList m n d = (take (n-m + 1) . drop m) d
 
-main = print $ get (create (replicate 4 [1..4])) 1 0
+mirrorHorizontal:: Matrix a -> Matrix a
+mirrorHorizontal (Mat d) = create (map reverse d) 
+
+--elemwiseMult::(Num a) => Matrix a -> Matrix a -> Matrix a
+--elemwiseMult (Mat a) (Mat b) = create (zipWith (zipWith (*)) a b)
+
+
+filterMult :: (Num a) => Matrix a -> Matrix a -> (Int, Int) -> Matrix a
+filterMult ker im (x,y) = elemwiseMult newKer newIm where
+	elemwiseMult (Mat a) (Mat b) = create (zipWith (zipWith (*)) a b)
+	newIm = subMat im (x-r, y-r) (x+r, y+r)
+	newKer = subMat ker (r-x, r-y) (r-x + 2*r + 1, r-y +2*r +1)
+--	newKer = map (drop (pos (r-y))) (drop (pos (r-x)) ker) 
+	r = ((rows ker) - 1) `div` 2
+--	pos = max 0
+	
+
+
+
+main = print $ filterMult (create (replicate 3 [0.1,0.1,0.1])) (create (replicate 4 [1..4])) (3,3)
+
+
 --rowfold (\p acc -> (if p then '*' else '.'):acc) ""  (create [[True,True],[False,True]])
