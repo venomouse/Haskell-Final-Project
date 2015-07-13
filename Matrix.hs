@@ -59,21 +59,12 @@ subMat (Mat m) (x,y) (x',y') = create $ map (subList y y') (subList x x' m) wher
 mirrorHorizontal:: Matrix a -> Matrix a
 mirrorHorizontal (Mat d) = create (map reverse d) 
 
---elemwiseMult::(Num a) => Matrix a -> Matrix a -> Matrix a
---elemwiseMult (Mat a) (Mat b) = create (zipWith (zipWith (*)) a b)
-
-
 filterMult :: (Num a) => Matrix a -> Matrix a -> (Int, Int) -> Matrix a
 filterMult ker im (x,y) = elemwiseMult newKer newIm where
 	elemwiseMult (Mat a) (Mat b) = create (zipWith (zipWith (*)) a b)
 	newIm = subMat im (x-r, y-r) (x+r, y+r)
 	newKer = subMat ker (r-x, r-y) (r-x + 2*r + 1, r-y +2*r +1)
---	newKer = map (drop (pos (r-y))) (drop (pos (r-x)) ker) 
 	r = ((rows ker) - 1) `div` 2
---	pos = max 0
-	
-
-
 
 main = print $ filterMult (create (replicate 3 [0.1,0.1,0.1])) (create (replicate 4 [1..4])) (3,3)
 
