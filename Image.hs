@@ -27,6 +27,9 @@ generate f rows cols = fromList $ map calcRow [0..(rows-1)] where
 invert :: Image -> Image
 invert = fmap (\x -> 255-x)
 
+gamma :: Float -> Image -> Image 
+gamma g = fmap (\x -> floor $ ((fromIntegral x)/ 255.0) ** g * 255.0 )
+
 rectAbout :: Image -> (Int, Int) -> Int -> Image
 rectAbout i (x, y) r = subMat i (x-r, y-r) (x+r, y+r)
 
@@ -62,7 +65,7 @@ gBlurKernel     = fmap (/16) $ create [[1, 2, 1], [2, 4, 2], [1, 2, 1]]
 sobelY          = create [[-1,-2,-1], [0,0,0], [1,2,1]]
 sobelX          = create [[-1,0,1], [-2,0,2], [-1,0,1]]
 
-main = putStr $ display (sobel i) where
+main = putStr $ display (gamma 5 i) where
     i = (create smallMaria)
     f x y = ((x + y) * 12) `mod` 255
     k = sobelY
