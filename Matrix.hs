@@ -10,6 +10,7 @@ module Matrix
 ,   get
 ,   subMat
 ,   filterMult
+,   elemwise
 ) where
 
 import Control.Monad
@@ -66,7 +67,10 @@ filterMult ker im (x,y) = elemwiseMult newKer newIm where
 	newKer = subMat ker (r-x, r-y) (r-x + 2*r + 1, r-y +2*r +1)
 	r = ((rows ker) - 1) `div` 2
 
-main = print $ filterMult (create (replicate 3 [0.1,0.1,0.1])) (create (replicate 4 [1..4])) (3,3)
+elemwise :: (a -> b -> c) -> Matrix a -> Matrix b -> Matrix c
+elemwise f (Mat a)  (Mat b) = create $ zipWith (zipWith f) a b
+
+-- main = print $ add (create (replicate 4 [1..4])) (create (replicate 4 [1..4]))
 
 
 --rowfold (\p acc -> (if p then '*' else '.'):acc) ""  (create [[True,True],[False,True]])
